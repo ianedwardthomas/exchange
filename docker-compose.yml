@@ -5,16 +5,10 @@ version: '2'
 networks:
     # Explicitly-defined internal network for containers to talk to each other
     internal:
-        ipam:
-            config:
-              - subnet: 172.16.237.0/24
-                gateway: 172.16.237.1
+        driver: bridge
     # Network for exposing IPs for access from the host, e.g. your browser
     external:
-        ipam:
-            config:
-              - subnet: 172.16.238.0/24
-                gateway: 172.16.238.1
+        driver: bridge
 
 volumes:
     # This magic line creates a named volume for sharing across containers.
@@ -31,11 +25,8 @@ services:
         # The only change from upstream is to add a section to the nginx config
         build: ./docker/nginx
         networks:
-            internal:
-            # users need nginx visible to host on a fixed IP for convenience;
-            # otherwise constantly do a dance with `docker inspect` to get IPs
-            external:
-                ipv4_address: 172.16.238.2
+            - internal
+            - external
         # proxy needs hostnames which resolve to running exchange and geoserver
         # containers, so it can proxy to them
         links:
@@ -69,9 +60,8 @@ services:
         ports:
             - "9200"
         networks:
-            internal:
-            external:
-                ipv4_address: 172.16.238.5
+            - internal
+            - external
 
     # Useful thing
     geoserver:
@@ -89,11 +79,8 @@ services:
         volumes:
             - scratch:/scratch
         networks:
-            internal:
-            # Expose Geoserver on a fixed host IP for diagnostic purposes.
-            # Tomcat has /, GeoServer is under /geoserver at this IP
-            external:
-                ipv4_address: 172.16.238.4
+            - internal
+            - external
 
     # Django app which presents an interface and ties everything else together
     exchange:
@@ -130,9 +117,8 @@ services:
             # - $HOME/stuff/django-osgeo-importer:/mnt/django-osgeo-importer:ro
 
         networks:
-            internal:
-            external:
-                ipv4_address: 172.16.238.3
+            - internal
+            - external
 
         ports:
             # Django at /

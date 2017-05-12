@@ -9,7 +9,8 @@ if [[ $PATH != *"pgsql-9.6"* ]];then
   export PATH=$PATH:/usr/pgsql-9.6/bin
 fi
 # TODO: does this need to be a hardcoded IP?
-export SITEURL='http://172.16.238.2/'
+#export SITEURL='http://172.16.238.2/'
+export SITEURL='http://127.0.0.1/'
 export ES_URL='http://search:9200/'
 export LOCKDOWN_GEONODE=True
 export BROKER_URL='amqp://guest:guest@queue:5672/'
