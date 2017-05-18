@@ -55,7 +55,7 @@ start_django
 wait_for_django
 wait_for_geoserver
 
-log "Exchange is ready on http://127.0.0.1"
+log "Exchange is ready on http://131.170.250.166"
 
 # Wait for Django process and propagate its exit status.
 started "${name}" "${pid}"
