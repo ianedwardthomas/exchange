@@ -1,14 +1,5 @@
 version: '2'
 
-# It's not normally necessary to explicitly set up Docker's networks, but
-# we want to set fixed IPs for convenience, and that seems to require all this.
-networks:
-    # Explicitly-defined internal network for containers to talk to each other
-    internal:
-        driver: bridge
-    # Network for exposing IPs for access from the host, e.g. your browser
-    external:
-        driver: bridge
 
 volumes:
     # This magic line creates a named volume for sharing across containers.
@@ -24,14 +15,19 @@ services:
         # see docker/nginx/Dockerfile
         # The only change from upstream is to add a section to the nginx config
         build: ./docker/nginx
-        networks:
-            - internal
-            - external
+        restart: on-failure
         # proxy needs hostnames which resolve to running exchange and geoserver
         # containers, so it can proxy to them
         links:
             - exchange
             - geoserver
+        depends_on:
+            - exchange
+            - geoserver
+        ports:
+            - "80:80"
+            - "443:443"
+            - "8080:8080"
 
     # Database for use by Django, Celery and GeoServer
     database:
@@ -41,27 +37,27 @@ services:
         # adds in an initialization script for Exchange-specific requirements
         # also bakes in the initialization to avoid doing it at boot time
         build: ./docker/postgres
-        networks:
-            - internal
+        restart: on-failure
+
+        volumes:
+            # experimental
+            - ./dbdata:/var/lib/postgresl/data_docker
 
     # Message queue receives tasks from django to be consumed by celery worker
     queue:
         container_name: queue
         # Not customized
         image: rabbitmq:3.6
-        networks:
-            - internal
+        restart: on-failure
+
 
     # Search engine
     search:
         container_name: search
         # Not customized
         image: elasticsearch:1.7
-        ports:
-            - "9200"
-        networks:
-            - internal
-            - external
+        # ports:
+        #     - "9200"
 
     # Useful thing
     geoserver:
@@ -71,16 +67,17 @@ services:
         # This modifies a tomcat image using JRE 8 to add and configure an
         # instance of GeoServer from the magic WAR file Exchange needs.
         build: ./docker/geoserver
-        ports:
-            # 8080 is the traditional HTTP port baked into server.xml
-            - "8080"
+        # ports:
+        #     # 8080 is the traditional HTTP port baked into server.xml
+        #     - "8080"
         links:
+            - database
+        depends_on:
             - database
         volumes:
             - scratch:/scratch
-        networks:
-            - internal
-            - external
+        restart: on-failure
+
 
     # Django app which presents an interface and ties everything else together
     exchange:
@@ -89,7 +86,11 @@ services:
         image: exchange
         # see ./Dockerfile which defines the whole setup
         build: .
-
+        depends_on:
+            - database
+            - queue
+            - geoserver
+        restart: on-failure
         links:
             - database
             - queue
@@ -116,15 +117,13 @@ services:
             # Example of how to mount something else from here.
             # - $HOME/stuff/django-osgeo-importer:/mnt/django-osgeo-importer:ro
 
-        networks:
-            - internal
-            - external
 
-        ports:
-            # Django at /
-            - "80"
-            # export ssl version as well.
-            - "443"
+        # ports:
+        expose:
+             # Django at /
+             - "80"
+             # export ssl version as well.
+             - "443"
 
     # worker process which does "background" work for the django app
     worker:
@@ -139,16 +138,18 @@ services:
             - database
             - geoserver
             - search
-
         # Inherit volume specifications from the exchange container
         volumes_from:
             - exchange
+        depends_on:
+            - proxy
+            - database
+            - geoserver
+            - search
         command: /root/worker.sh
         # celery worker brought back up if it goes down.
-        restart: always
-        networks:
-            - internal
-            - external
+        restart: on-failure
+
 
     # This memcached is not used by anything.
     cache:
