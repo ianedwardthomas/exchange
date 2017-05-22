@@ -38,10 +38,9 @@ services:
         # also bakes in the initialization to avoid doing it at boot time
         build: ./docker/postgres
         restart: on-failure
-
-        #volumes:
+        volumes:
             # experimental
-        #    - ./dbdata:/var/lib/postgresl/data_docker
+            - ./dbdata:/var/lib/postgresql/data
 
     # Message queue receives tasks from django to be consumed by celery worker
     queue:
