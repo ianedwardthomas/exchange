@@ -2,7 +2,8 @@
 # because it uses jre7.
 FROM tomcat:9-jre8
 
-ENV GEOIP 131.170.250.166
+ARG GEOIP 
+RUN echo $GEOIP
 # Grab the WAR file containing the version of GeoServer Exchange depends on.
 # Avoid ADD so we can reuse this layer instead of downloading at every build.
 RUN wget --directory-prefix /tmp --progress=dot:giga https://exchange-development-war.s3.amazonaws.com/war/geoserver.war

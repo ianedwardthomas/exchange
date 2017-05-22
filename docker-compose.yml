@@ -66,7 +66,10 @@ services:
         # see docker/geoserver/Dockerfile
         # This modifies a tomcat image using JRE 8 to add and configure an
         # instance of GeoServer from the magic WAR file Exchange needs.
-        build: ./docker/geoserver
+        build:
+            context: ./docker/geoserver
+            args:
+                GEOIP: $GEOIP
         # ports:
         #     # 8080 is the traditional HTTP port baked into server.xml
         #     - "8080"
@@ -95,6 +98,8 @@ services:
             - database
             - queue
             - geoserver
+        environment:
+            - GEOIP=$GEOIP
 
         # Code in volumes shared with host, so edits are immediately visible.
         volumes:
@@ -146,6 +151,8 @@ services:
             - database
             - geoserver
             - search
+        environment:
+            - GEOIP=$GEOIP
         command: /root/worker.sh
         # celery worker brought back up if it goes down.
         restart: on-failure
