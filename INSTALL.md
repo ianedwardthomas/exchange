@@ -55,3 +55,10 @@ It needs ports 80 and 443 to be open on the VM.
     ```
     git diff fdd425a...
     ```
+
+1. The complete data state of the containers are kept in three named data volumes: ```exchange_dbdata```, ```exchange_geodata```, ```exchange_scratch```.  See:
+    ```
+        docker volume ls
+    ```
+
+    If you delete all the containers with ```docker-compose down``` and then recreate ```docker-compose up -d``` then full state will be retained.  Only if you delete the volumes manually using ```docker volume rm``` or use the ```-v``` option of ```docker-compose down``` will the data actually be deleted.

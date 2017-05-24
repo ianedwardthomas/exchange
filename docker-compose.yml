@@ -4,7 +4,10 @@ version: '2'
 volumes:
     # This magic line creates a named volume for sharing across containers.
     # It has no defined location on the host system (real location is obscure).
+    # geodata and dbdata hold he complete state of the system
     scratch:
+    geodata:
+    dbdata:
 
 services:
 
@@ -78,6 +81,7 @@ services:
             - database
         volumes:
             - scratch:/scratch
+            - geodata:/usr/local/tomcat/webapps/geoserver
         restart: on-failure
 
 
