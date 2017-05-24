@@ -43,7 +43,7 @@ services:
         restart: on-failure
         volumes:
             # experimental
-            - ./dbdata:/var/lib/postgresql/data
+            - dbdata:/var/lib/postgresql/data
 
     # Message queue receives tasks from django to be consumed by celery worker
     queue:
@@ -159,6 +159,11 @@ services:
         command: /root/worker.sh
         # celery worker brought back up if it goes down.
         restart: on-failure
+        expose:
+             # Django at /
+             - "80"
+             # export ssl version as well.
+             - "443"
 
 
     # This memcached is not used by anything.
