@@ -1,50 +1,57 @@
 HowTo Install
 =============
 
-__WARNING: under construction__
+This installs the ```prod``` version of boundless exchange using docker on a single host VM.
+It needs ports 80 and 443 to be open on the VM.
 
-First  create a boundless directory:
-```bash
-mkdir ~/git/boundless ; cd $_
-```
+1. Install recent version of docker and docker-compose (see http://docker.com). Note the additional steps in the instructions to run docker as non-root and restart docker daemon on system reboot.
 
-RMIT blocks port 9418 used by git protocol so we use this workaround:
-```
-git config --global url."https://".insteadOf git://
-```
+1. Create a boundless directory:
+    ```bash
+    mkdir -p ~/git/boundless ; cd $_
+    ```
 
-Now we will checkout and install Maploom:
-```
-sudo npm config set prefix /usr/local
-git clone https://github.com/ianedwardthomas/MapLoom.git —-branch prod # includes all maploop fixes
-cd MapLoom
-sudo npm install -g grunt-cli karma bower
-sudo npm install
-bower install
-grunt watch -v
-cd ..
-```
+1. RMIT blocks port 9418 used by git protocol so we use this workaround:
+    ```
+    git config --global url."https://".insteadOf git://
+    ```
 
-Now install geonode (which includes all fixes):
-```
-git clone https://github.com/ianedwardthomas/geonode —-branch prod
-```
+1. Now we will checkout and install the prod branch of Maploom:
+    ```
+    sudo npm config set prefix /usr/local
+    git clone https://github.com/ianedwardthomas/MapLoom.git --branch prod # includes all maploop fixes
+    cd MapLoom
+    sudo npm install -g grunt-cli karma bower
+    sudo npm install
+    bower install
+    grunt watch -v   # hit control-c to escape when it hangs on waiting...
+    cd ..
+    ```
 
-Finally install prod version of exchange:
-```
-git clone https://github.com/ianedwardthomas/exchange.git —-branch prod2
-```
+1. Now install geonode (which includes all fixes):
+    ```
+    git clone https://github.com/ianedwardthomas/geonode --branch prod
+    ```
 
-Next change the ```GEOIP``` variable in the ```.env``` file to point to external address for your host, then:
-```
-cd exchange
-docker-compose build
-docker-compose up -d
-```
+1. Finally install ```prod2``` version of exchange:
+    ```
+    git clone https://github.com/ianedwardthomas/exchange.git --branch prod2
+    ```
 
+1. Copy the built in version of ```env``` into your own copy and edit as needed:
+    ```
+    cp exchange/env exchange/.env
+    ```
 
-Run the following command to see all the changes that have happened on prod branch since it was started:
-```
-git diff master...
-```
+1. Next change the ```GEOIP``` variable in the ```.env``` file to point to external address for your host, then:
+    ```
+    cd exchange
+    docker-compose build
+    docker-compose up -d
+    ```
+1. The server should be up and running at http://hostip, where hostip is host VM external ip address.
 
+1. Run the following command to see all the changes that have happened exchange's prod2 branch since it was started:
+    ```
+    git diff fdd425a...
+    ```
