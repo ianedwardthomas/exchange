@@ -15,6 +15,19 @@ It needs ports 80 and 443 to be open on the VM.
     ```
     git config --global url."https://".insteadOf git://
     ```
+1. Install recent npm and nodejs for your platform (needed for Maploom):
+
+   * For Ubuntu 16.04:
+       ```
+       cd ~
+       curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
+       sudo bash nodesource_setup.sh
+       sudo apt-get install nodejs
+       sudo apt-get install build-essential
+       ```
+       (from https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-16-04)
+
+    * See http://nodejs.org for other distributions.
 
 1. Now we will checkout and install the prod branch of Maploom:
     ```
